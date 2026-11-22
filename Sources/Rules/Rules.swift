@@ -23,7 +23,8 @@ struct Rule: Equatable {
 func parseRules(_ text: String, home: String) -> (rules: [Rule], skipped: [String]) {
     var rules: [Rule] = []
     var skipped: [String] = []
-    for raw in text.split(separator: "\n") {
+    // .newlines, so a file saved with CRLF does not leave a \r in the profile.
+    for raw in text.components(separatedBy: .newlines) {
         let line = raw.trimmingCharacters(in: .whitespaces)
         if line.isEmpty || line.hasPrefix("#") { continue }
         guard let gap = line.range(of: #"\s{2,}|\t"#, options: .regularExpression) else {
@@ -34,8 +35,16 @@ func parseRules(_ text: String, home: String) -> (rules: [Rule], skipped: [Strin
         let rest = line[gap.upperBound...].trimmingCharacters(in: .whitespaces)
         if folder.hasPrefix("~") { folder = home + folder.dropFirst() }
         while folder.count > 1 && folder.hasSuffix("/") { folder.removeLast() }
-        let parts = rest.split(separator: ":", maxSplits: 1).map { $0.trimmingCharacters(in: .whitespaces) }
-        rules.append(Rule(folder: folder, target: Target(app: parts[0], profile: parts.count > 1 ? parts[1] : nil)))
+        let parts = rest.split(separator: ":", maxSplits: 1, omittingEmptySubsequences: false)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        // A rule with no app (`~/work  : Work`) would otherwise crash on parts[0]
+        // or name the profile as the app.
+        guard let app = parts.first, !app.isEmpty else {
+            skipped.append(line)
+            continue
+        }
+        let profile = parts.count > 1 && !parts[1].isEmpty ? parts[1] : nil
+        rules.append(Rule(folder: folder, target: Target(app: app, profile: profile)))
     }
     return (rules, skipped)
 }

@@ -25,6 +25,11 @@ func runRulesTests() {
         Check.equal(rules[1].folder, "/Users/test/work/clients/acme", "a trailing slash is dropped")
         Check.equal(rules[2].target, Target(app: "Firefox"), "a tab is a gap, and no colon is no profile")
         Check.equal(parseRules("", home: home).rules, [], "an empty file is no rules")
+        let crlf = parseRules("/a  Google Chrome: Work\r\n/b  Safari\r\n", home: home)
+        Check.equal(crlf.rules.first?.target.profile, "Work", "a CRLF file leaves no carriage return in the profile")
+        let noApp = parseRules("/a  : Work\n/b  :\n/c  Safari:\n", home: home)
+        Check.equal(noApp.skipped, ["/a  : Work", "/b  :"], "a rule without an app is reported, not a crash")
+        Check.equal(noApp.rules.first?.target, Target(app: "Safari"), "an empty profile after the colon is no profile")
     }
 
     Check.suite("the most specific folder wins") {
