@@ -16,7 +16,14 @@ git clone https://github.com/john-athan/linkrouter && cd linkrouter && ./install
 
 Builds with `swiftc`, installs `~/Applications/Linkrouter.app`, and writes
 `~/.config/linkrouter/rules` from `rules.example` if you have none. No Xcode
-project, no package manager, nothing downloaded. Then:
+project, no package manager, nothing downloaded. Or with Homebrew, which builds
+from the same source:
+
+```sh
+brew install john-athan/tap/linkrouter
+```
+
+and follow the three lines it prints. Then:
 
 1. Edit `~/.config/linkrouter/rules`.
 2. `~/Applications/Linkrouter.app/Contents/MacOS/linkrouter --set-default`, and

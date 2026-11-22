@@ -162,6 +162,8 @@ if argv.count >= 2 && argv[1] == "--which" {
 }
 if argv.count >= 2 && argv[1] == "--set-default" {
     let me = Bundle.main.bundleURL
+    // Register this copy first, so it works wherever it was copied to.
+    LSRegisterURL(me as CFURL, true)
     let group = DispatchGroup()
     for scheme in ["http", "https"] {
         group.enter()
