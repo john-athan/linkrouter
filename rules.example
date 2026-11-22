@@ -1,0 +1,8 @@
+# folder, then two spaces or a tab, then the browser and an optional profile.
+# The most specific folder that contains the clicked window's folder wins.
+# * catches everything else, including links from apps without a folder.
+# A profile is Chrome's name for it ("Work") or its directory ("Profile 2").
+
+~/work                 Google Chrome: Work
+~/work/clients/acme    Google Chrome: Acme
+*                      Safari
