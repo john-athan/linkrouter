@@ -1,6 +1,10 @@
+<p align="center"><img src="assets/logo.svg" width="96" alt="Linkrouter: a folder whose path branches to three browsers"></p>
+
 # Linkrouter
 
 **Links open in the browser that belongs to the folder you clicked them in.**
+
+<img src="assets/how-it-works.svg" alt="A link clicked in a terminal under ~/work opens in Chrome's Work profile, under ~/work/clients/acme in the Acme profile, anywhere else in Safari" width="860">
 
 Cmd-click a link in a terminal under `~/work` and it opens in Chrome's work
 profile. Do the same under `~/work/clients/acme` and it opens in the Acme
