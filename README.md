@@ -14,23 +14,36 @@ picks a browser and a profile, and hands the link over.
 
 ## Install
 
+### Homebrew (recommended)
+
+```sh
+brew install john-athan/tap/linkrouter
+cp -R "$(brew --prefix linkrouter)/Linkrouter.app" /Applications/
+```
+
+Homebrew builds it from source with `swiftc` and puts `linkrouter` on your
+PATH. The app has to be copied to `/Applications`, because the default browser
+is tied to where the app is and Homebrew removes its own copy on every upgrade.
+After `brew upgrade linkrouter`, copy it again.
+
+### From source
+
 ```sh
 git clone https://github.com/john-athan/linkrouter && cd linkrouter && make install
 ```
 
-Builds with `swiftc`, installs `~/Applications/Linkrouter.app`, and writes
+Installs `/Applications/Linkrouter.app`, registers it with macOS, and writes
 `~/.config/linkrouter/rules` from `rules.example` if you have none. No Xcode
-project, no package manager, nothing downloaded. Or with Homebrew, which builds
-from the same source:
+project, no package manager, nothing downloaded. To put `linkrouter` on your
+PATH, it prints the one `sudo ln` line that needs. To upgrade, `git pull` and
+`make install` again. A copy in `~/Applications` from 1.0.0 is moved over, and
+stays the default browser.
 
-```sh
-brew install john-athan/tap/linkrouter
-```
+### Then, once
 
-and follow the three lines it prints. Then:
-
-1. Edit `~/.config/linkrouter/rules`.
-2. `~/Applications/Linkrouter.app/Contents/MacOS/linkrouter --set-default`, and
+1. Edit `~/.config/linkrouter/rules`
+   (Homebrew: `cp -n "$(brew --prefix linkrouter)/share/linkrouter/rules.example" ~/.config/linkrouter/rules` first).
+2. `/Applications/Linkrouter.app/Contents/MacOS/linkrouter --set-default`, and
    confirm the dialog macOS shows.
 3. Open a link once. macOS asks for Accessibility access: allow it in System
    Settings → Privacy & Security → Accessibility.
@@ -54,7 +67,7 @@ Brave. The file is read on every link, so an edit counts immediately.
 To see which rule a folder gets, without opening anything:
 
 ```sh
-~/Applications/Linkrouter.app/Contents/MacOS/linkrouter --which ~/work/clients/acme
+linkrouter --which ~/work/clients/acme
 ```
 
 ## How it knows the folder
@@ -91,7 +104,7 @@ One: Accessibility, to read the focused window's folder. Without it every link
 goes to the `*` rule, so nothing breaks, it just stops routing.
 
 Linkrouter is ad-hoc signed, so macOS keys the grant to a hash of the binary,
-and every rebuild is a new app to it. After `make install`:
+and every rebuild is a new app to it. After every upgrade:
 
 1. Open System Settings → Privacy & Security → Accessibility.
 2. Select Linkrouter and remove it with the minus button.
@@ -100,28 +113,32 @@ and every rebuild is a new app to it. After `make install`:
 ## Privacy
 
 No network. Linkrouter reads one value, the focused window's document, and
-only when a link arrives. It writes one file: `~/Library/Logs/linkrouter.log`,
-a line per link with the app, the folder, the chosen browser and the URL, so
-you can see why a link went where it did. Delete it whenever you like.
+only when a link arrives. It writes one file, `~/Library/Logs/linkrouter.log`:
+a line per link with the app, the folder, the chosen browser and the link's
+host, so you can see why a link went where it did. Never the path or the
+query, where sign-in codes and reset tokens travel. It is readable by you only
+and stays under 256 KiB. More in [SECURITY.md](SECURITY.md).
 
 ## Uninstall
 
-Pick another default browser in System Settings → Desktop & Dock, then:
-
-```sh
-rm -rf ~/Applications/Linkrouter.app ~/.config/linkrouter ~/Library/Logs/linkrouter.log
-```
+Pick another default browser in System Settings → Desktop & Dock, then
+`make uninstall` from the checkout, or `brew uninstall linkrouter` and
+`rm -rf /Applications/Linkrouter.app`. Your rules in `~/.config/linkrouter`
+stay until you delete them.
 
 ## Development
 
 ```sh
-tools/validate.sh       # build, then check the rules through --which
+make check              # build, then the tests (tools/validate.sh)
 oss check linkrouter    # the same thing, through the fleet tool
 ```
 
-One `swiftc` call over `main.swift`. `LINKROUTER_RULES` and `LINKROUTER_LOG`
-point the binary at other files, which is how the tests run without touching
-yours.
+`swiftc` over `Sources/`, no package manager. The rules, the profile lookup and
+the log are plain functions under `Sources/Rules` and `Sources/Log`, tested in
+`Tests/` without a window, a permission or a browser. `LINKROUTER_RULES` and
+`LINKROUTER_LOG` point the binary at other files, for trying a rules file out
+with `--which` before it goes live. Why it works the way it does is in
+[docs/adr](docs/adr/README.md).
 
 ## License
 

@@ -6,7 +6,7 @@ originated elsewhere.
 ## Dependencies
 
 None, and there is no manifest that could acquire one. `tools/build-app.sh` hands
-`main.swift` to `swiftc`; there is no `Package.swift`, no Xcode project and no
+every `.swift` file under `Sources/` to `swiftc`; there is no `Package.swift`, no Xcode project and no
 package manager. The app links Apple's SDK frameworks only (AppKit and
 ApplicationServices), which are used under the Apple Developer Program
 agreement and are not redistributed here.
