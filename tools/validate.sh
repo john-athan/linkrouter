@@ -14,7 +14,10 @@ step "Info.plist"
 plutil -lint Info.plist
 
 step "build"
-./build.sh
+tools/build-app.sh
+
+step "test"
+tools/test.sh
 
 step "rules"
 tmp=$(mktemp -d)

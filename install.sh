@@ -2,7 +2,7 @@
 # Build Linkrouter.app, install it to ~/Applications, register it with macOS.
 set -eu
 cd "$(dirname "$0")"
-./build.sh
+tools/build-app.sh
 
 app="$HOME/Applications/Linkrouter.app"
 mkdir -p "$HOME/Applications"
