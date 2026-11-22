@@ -6,6 +6,8 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-11-22
+
 - Installs to `/Applications` like the other apps here; `make install` moves a 1.0.0 copy out of `~/Applications`, and it stays the default browser
 - The log names each link by its host only, never its path or query, is readable by you only and stays under 256 KiB; a 1.0.0 log full of whole URLs is started over
 - `linkrouter` goes on the PATH with `make install` too, and has `--help`
