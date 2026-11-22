@@ -11,7 +11,7 @@ picks a browser and a profile, and hands the link over.
 ## Install
 
 ```sh
-git clone https://github.com/john-athan/linkrouter && cd linkrouter && ./install.sh
+git clone https://github.com/john-athan/linkrouter && cd linkrouter && make install
 ```
 
 Builds with `swiftc`, installs `~/Applications/Linkrouter.app`, and writes
@@ -87,7 +87,7 @@ One: Accessibility, to read the focused window's folder. Without it every link
 goes to the `*` rule, so nothing breaks, it just stops routing.
 
 Linkrouter is ad-hoc signed, so macOS keys the grant to a hash of the binary,
-and every rebuild is a new app to it. After `./install.sh`:
+and every rebuild is a new app to it. After `make install`:
 
 1. Open System Settings → Privacy & Security → Accessibility.
 2. Select Linkrouter and remove it with the minus button.
