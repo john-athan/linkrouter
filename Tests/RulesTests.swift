@@ -67,11 +67,28 @@ func runRulesTests() {
           "Profile 3": {"name": "Acme"}
         }}}
         """.utf8)
-        Check.equal(profileDirectory(profile: "Work", localState: state), "Profile 2", "a name becomes its directory")
-        Check.equal(profileDirectory(profile: "Profile 3", localState: state), "Profile 3", "a directory stays itself")
-        Check.equal(profileDirectory(profile: "Nobody", localState: state), "Nobody", "an unknown name passes through")
-        Check.equal(profileDirectory(profile: "Work", localState: nil), "Work", "no Local State, no lookup")
-        Check.equal(profileDirectory(profile: "Work", localState: Data("{".utf8)), "Work", "broken JSON, no lookup")
+        Check.equal(lookUpProfile("Work", localState: state), .directory("Profile 2"), "a name becomes its directory")
+        Check.equal(lookUpProfile("Profile 3", localState: state), .directory("Profile 3"), "a directory stays itself")
+        Check.equal(lookUpProfile("Nobody", localState: state), .unknown(known: ["Person 1", "Work", "Acme"]),
+                    "an unknown name is refused and lists the names, never passed to Chrome")
+        Check.equal(lookUpProfile("Work", localState: nil), .unreadable, "no Local State is refused")
+        Check.equal(lookUpProfile("Work", localState: Data("{".utf8)), .unreadable, "broken JSON is refused")
+
+        // The bug of 1.0.1: an unresolved "Work" made Chrome create an empty
+        // directory "Work", which then matched by directory on every link.
+        let shadowed = Data("""
+        {"profile": {"info_cache": {
+          "Default": {"name": "Work"},
+          "Work":    {"name": "Your Chrome"}
+        }}}
+        """.utf8)
+        Check.equal(lookUpProfile("Work", localState: shadowed), .directory("Default"),
+                    "the name Chrome shows wins over a directory of the same spelling")
+
+        Check.equal(describe(.unknown(known: ["Work"]), profile: "Acme", app: "Google Chrome"),
+                    "Google Chrome has no profile \"Acme\"; its profiles are: Work", "the refusal names the profiles")
+        Check.that(describe(.unreadable, profile: "Work", app: "Safari").hasPrefix("Safari has no profiles"),
+                   "a profile on a browser without profiles is refused")
     }
 
     Check.suite("the arguments for open") {

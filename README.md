@@ -61,8 +61,10 @@ profile. The most specific folder that contains the clicked window's folder
 wins, so the order of the lines does not matter. `*` takes everything else.
 
 The profile can be the name Chrome shows ("Work") or its directory
-("Profile 2"). Profiles work for Google Chrome, Chrome Beta, Chromium and
-Brave. The file is read on every link, so an edit counts immediately.
+("Profile 2"); the name wins if both match. Profiles work for Google Chrome,
+Chrome Beta, Chromium and Brave. A profile Linkrouter cannot find opens
+nothing: it asks first, since Chrome would otherwise create an empty profile
+of that name. The file is read on every link, so an edit counts immediately.
 
 To see which rule a folder gets, without opening anything:
 

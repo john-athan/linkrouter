@@ -6,6 +6,10 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+- A profile is found by the name Chrome shows before its directory, so an empty directory of the same spelling no longer takes the links
+- A profile that cannot be found no longer reaches Chrome, which silently created an empty profile of that name: Linkrouter asks first and lists the profiles there are
+- `--which` says why a profile does not resolve
+
 ## [1.0.1] - 2026-11-22
 
 - Installs to `/Applications` like the other apps here; `make install` moves a 1.0.0 copy out of `~/Applications`, and it stays the default browser

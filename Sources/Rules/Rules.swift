@@ -80,22 +80,49 @@ let chromiumSupportDirs: [String: String] = [
     "Chromium": "Chromium",
 ]
 
+/// What a rule's profile turns into: the directory Chrome needs, or the reason
+/// there is none.
+enum ProfileLookup: Equatable {
+    case directory(String)
+    /// No profile has that name or directory; `known` are the names Chrome shows.
+    case unknown(known: [String])
+    /// No readable `Local State`, or an app that has no profiles.
+    case unreadable
+}
+
 /// The profile directory Chrome needs (`Profile 2`) for what the rule says,
-/// which may be that directory or the name Chrome shows (`Work`). The names
-/// are in `Local State` under `profile.info_cache` (ADR 0004). Anything this
-/// cannot resolve is passed through unchanged, so Chrome reports the problem
-/// rather than this guessing.
-func profileDirectory(profile: String, localState: Data?) -> String {
+/// which may be the name Chrome shows (`Work`) or that directory. The names
+/// are in `Local State` under `profile.info_cache` (ADR 0004).
+///
+/// The name Chrome shows wins over a directory of the same spelling, because
+/// the name is what people write. Anything else is not resolved: Chrome given
+/// a directory it does not have silently creates an empty profile there, and
+/// that profile would then match by directory on every later link.
+func lookUpProfile(_ profile: String, localState: Data?) -> ProfileLookup {
     guard let localState,
           let json = try? JSONSerialization.jsonObject(with: localState) as? [String: Any],
           let cache = (json["profile"] as? [String: Any])?["info_cache"] as? [String: Any]
-    else { return profile }
-    if cache[profile] != nil { return profile }
+    else { return .unreadable }
     // Sorted, so two profiles with one name resolve the same way every time.
-    for dir in cache.keys.sorted() where (cache[dir] as? [String: Any])?["name"] as? String == profile {
-        return dir
+    let dirs = cache.keys.sorted()
+    let name = { (dir: String) in (cache[dir] as? [String: Any])?["name"] as? String }
+    if let dir = dirs.first(where: { name($0) == profile }) { return .directory(dir) }
+    if cache[profile] != nil { return .directory(profile) }
+    return .unknown(known: dirs.compactMap(name))
+}
+
+/// What the log, `--which` and the alert say when a profile does not resolve.
+func describe(_ lookup: ProfileLookup, profile: String, app: String) -> String {
+    switch lookup {
+    case .directory(let dir):
+        return "profile directory: \(dir)"
+    case .unknown(let known):
+        return "\(app) has no profile \"\(profile)\"; its profiles are: \(known.joined(separator: ", "))"
+    case .unreadable:
+        return chromiumSupportDirs[app] == nil
+            ? "\(app) has no profiles Linkrouter can open; profiles work for \(chromiumSupportDirs.keys.sorted().joined(separator: ", "))"
+            : "cannot read the Local State of \(app), so the profile \"\(profile)\" cannot be found"
     }
-    return profile
 }
 
 /// The arguments for /usr/bin/open. Passed as a list and never through a

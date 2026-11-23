@@ -22,7 +22,7 @@ case "--which":
     }
     print(describe(rule))
     if let p = rule.target.profile {
-        print("profile directory: \(profileDirectory(app: rule.target.app, profile: p))")
+        print(describe(lookUpProfile(app: rule.target.app, profile: p), profile: p, app: rule.target.app))
     }
     exit(0)
 

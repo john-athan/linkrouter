@@ -21,19 +21,40 @@ func frontFolder() -> (app: String, folder: String?) {
     return (name, path)
 }
 
-func open(_ urls: [URL], with target: Target) {
-    let dir = target.profile.map { profileDirectory(app: target.app, profile: $0) }
+func open(_ urls: [URL], with target: Target, profileDirectory dir: String?) {
     let p = Process()
     p.executableURL = URL(fileURLWithPath: "/usr/bin/open")
     p.arguments = openArguments(urls, target: target, profileDirectory: dir)
     do { try p.run() } catch { log("open failed: \(error)") }
 }
 
+/// Asks whether to open the links in the app's last used profile, which may be
+/// the wrong account. Nothing opens without that yes (ADR 0004).
+func confirmWithoutProfile(_ problem: String, app: String, urls: [URL]) -> Bool {
+    NSApp.setActivationPolicy(.accessory)
+    NSApp.activate(ignoringOtherApps: true)
+    let alert = NSAlert()
+    alert.alertStyle = .warning
+    alert.messageText = "Linkrouter cannot find the profile"
+    alert.informativeText = "\(problem).\n\nFix the rule in \(configPath).\n\nLink: \(urls.map(redact).joined(separator: " "))"
+    alert.addButton(withTitle: "Cancel")
+    alert.addButton(withTitle: "Open in \(app) anyway")
+    return alert.runModal() == .alertSecondButtonReturn
+}
+
 func route(_ urls: [URL]) {
     let (app, folder) = frontFolder()
     let target = choose(loadRules(), folder: folder)?.target ?? Target(app: "Safari")
     log("\(app) \(folder ?? "-") -> \(describe(target)) \(urls.map(redact).joined(separator: " "))")
-    open(urls, with: target)
+    guard let profile = target.profile else { return open(urls, with: target, profileDirectory: nil) }
+    let lookup = lookUpProfile(app: target.app, profile: profile)
+    if case .directory(let dir) = lookup { return open(urls, with: target, profileDirectory: dir) }
+    let problem = describe(lookup, profile: profile, app: target.app)
+    log(problem)
+    if confirmWithoutProfile(problem, app: target.app, urls: urls) {
+        log("opened in \(target.app) without a profile, as asked")
+        open(urls, with: Target(app: target.app), profileDirectory: nil)
+    }
 }
 
 /// No window, no Dock icon, nothing resident (ADR 0003): macOS starts it for a

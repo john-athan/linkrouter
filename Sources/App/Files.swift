@@ -19,9 +19,9 @@ func loadRules() -> [Rule] {
     return rules
 }
 
-func profileDirectory(app: String, profile: String) -> String {
+func lookUpProfile(app: String, profile: String) -> ProfileLookup {
     let state = chromiumSupportDirs[app].flatMap {
         FileManager.default.contents(atPath: "\(home)/Library/Application Support/\($0)/Local State")
     }
-    return profileDirectory(profile: profile, localState: state)
+    return lookUpProfile(profile, localState: state)
 }

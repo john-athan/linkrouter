@@ -12,13 +12,25 @@ directory with its display name.
 
 ## Decision
 
-A rule may name the profile either way. When it is not a directory in
-`info_cache`, Linkrouter looks for a profile with that display name and uses its
-directory, the alphabetically first one if two share a name. Anything it cannot
-resolve, including a missing or broken `Local State`, is passed to Chrome
-unchanged, so Chrome reports the problem instead of Linkrouter guessing. This
-works for Google Chrome, Chrome Beta, Chromium and Brave, whose support
-folders are listed in `Sources/Rules/Rules.swift`.
+A rule may name the profile either way. Linkrouter first looks for a profile
+with that display name and uses its directory, the alphabetically first one if
+two share a name. Only when no name matches does it take the rule as a
+directory in `info_cache`. This works for Google Chrome, Chrome Beta, Chromium
+and Brave, whose support folders are listed in `Sources/Rules/Rules.swift`.
+
+A profile it cannot resolve never reaches the browser: an unknown name, a
+missing or broken `Local State`, or a profile on a browser without profiles.
+Linkrouter logs the reason and shows an alert that names the known profiles.
+The link opens only on "Open anyway", in the browser's last used profile. This
+alert is the one window Linkrouter shows, an exception to ADR 0003.
+
+Amended 2026-11-23. Until then, a directory matched before a display name, and
+an unresolved profile went to Chrome unchanged in the hope that Chrome reports
+it. Chrome reports nothing: it silently creates an empty profile in a new
+directory of that spelling. A rule `Google Chrome: Pareo` for the profile shown
+as "Pareo" (directory `Default`) once made Chrome create an empty directory
+`Pareo`, and from then on every link matched that directory and opened signed
+out.
 
 A profile is opened with `open -na <app> --args --profile-directory=...`. The
 `-n` starts a short-lived instance that hands the link to the running browser
