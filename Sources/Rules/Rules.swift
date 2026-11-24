@@ -98,11 +98,19 @@ enum ProfileLookup: Equatable {
 /// the name is what people write. Anything else is not resolved: Chrome given
 /// a directory it does not have silently creates an empty profile there, and
 /// that profile would then match by directory on every later link.
-func lookUpProfile(_ profile: String, localState: Data?) -> ProfileLookup {
+///
+/// macOS 27 does not let the app read `Local State`, and does not ask. Then
+/// only a directory as Chrome itself names them is taken, and only if
+/// `directoryExists` says it is there, which macOS still answers.
+func lookUpProfile(_ profile: String, localState: Data?,
+                   directoryExists: (String) -> Bool = { _ in false }) -> ProfileLookup {
     guard let localState,
           let json = try? JSONSerialization.jsonObject(with: localState) as? [String: Any],
           let cache = (json["profile"] as? [String: Any])?["info_cache"] as? [String: Any]
-    else { return .unreadable }
+    else {
+        let isDirectoryName = profile.range(of: #"^(Default|Profile [0-9]+)$"#, options: .regularExpression) != nil
+        return isDirectoryName && directoryExists(profile) ? .directory(profile) : .unreadable
+    }
     // Sorted, so two profiles with one name resolve the same way every time.
     let dirs = cache.keys.sorted()
     let name = { (dir: String) in (cache[dir] as? [String: Any])?["name"] as? String }
@@ -121,7 +129,8 @@ func describe(_ lookup: ProfileLookup, profile: String, app: String) -> String {
     case .unreadable:
         return chromiumSupportDirs[app] == nil
             ? "\(app) has no profiles Linkrouter can open; profiles work for \(chromiumSupportDirs.keys.sorted().joined(separator: ", "))"
-            : "cannot read the Local State of \(app), so the profile \"\(profile)\" cannot be found"
+            : "macOS does not let Linkrouter read the profile names of \(app), and it has no profile directory \"\(profile)\" (they are spelled \"Default\" or \"Profile 2\"). "
+                + "Run linkrouter --which <folder> in a terminal to see the directory"
     }
 }
 

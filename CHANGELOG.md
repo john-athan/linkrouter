@@ -6,6 +6,9 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+- macOS 27 does not let the app read Chrome's profile names: a rule with the profile's directory (`Default`, `Profile 2`) now works without them, if that directory exists
+- The alert for a name that cannot be looked up says that macOS refused it and how to find the directory, and `--which` says when a rule should use the directory
+
 ## [1.0.2] - 2026-11-23
 
 - A profile is found by the name Chrome shows before its directory, so an empty directory of the same spelling no longer takes the links

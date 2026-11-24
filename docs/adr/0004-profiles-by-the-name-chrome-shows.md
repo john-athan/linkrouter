@@ -32,6 +32,14 @@ as "Pareo" (directory `Default`) once made Chrome create an empty directory
 `Pareo`, and from then on every link matched that directory and opened signed
 out.
 
+Amended 2026-11-24. On macOS 27 the app may not read another app's data, and
+macOS refuses without asking (`kTCCServiceSystemPolicyAppDataDetailed does not
+allow prompting`), so names do not resolve for a clicked link. A command run in
+a terminal can be allowed what the app is not, so `--which` still resolves them.
+Without `Local State`, a profile is taken only if it is spelled `Default` or
+`Profile <number>` and that directory exists, which macOS still answers. Full
+Disk Access would restore names, but is far too much for that.
+
 A profile is opened with `open -na <app> --args --profile-directory=...`. The
 `-n` starts a short-lived instance that hands the link to the running browser
 in that profile and exits.

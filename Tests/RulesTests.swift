@@ -74,6 +74,21 @@ func runRulesTests() {
         Check.equal(lookUpProfile("Work", localState: nil), .unreadable, "no Local State is refused")
         Check.equal(lookUpProfile("Work", localState: Data("{".utf8)), .unreadable, "broken JSON is refused")
 
+        // macOS 27 refuses the app Local State, but answers whether a path exists.
+        let exists = { (dir: String) in ["Default", "Profile 2", "Work", "Profile 2/x"].contains(dir) }
+        func blind(_ profile: String) -> ProfileLookup {
+            lookUpProfile(profile, localState: nil, directoryExists: exists)
+        }
+        Check.equal(blind("Profile 2"), .directory("Profile 2"), "without Local State, a directory that exists is taken")
+        Check.equal(blind("Default"), .directory("Default"), "and so is Default")
+        Check.equal(blind("Profile 9"), .unreadable, "a directory that is not there is refused, or Chrome would create it")
+        Check.equal(blind("Work"), .unreadable, "a name is refused even if a directory is spelled like it")
+        Check.equal(blind("Profile 2/x"), .unreadable, "a path is not a directory name")
+        Check.equal(lookUpProfile("Profile 9", localState: state, directoryExists: { _ in true }),
+                    .unknown(known: ["Person 1", "Work", "Acme"]), "a readable Local State decides alone")
+        Check.that(describe(.unreadable, profile: "Work", app: "Google Chrome").contains("--which"),
+                   "the refusal says how to find the directory")
+
         // The bug of 1.0.1: an unresolved "Work" made Chrome create an empty
         // directory "Work", which then matched by directory on every link.
         let shadowed = Data("""

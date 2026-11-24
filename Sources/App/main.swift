@@ -22,7 +22,12 @@ case "--which":
     }
     print(describe(rule))
     if let p = rule.target.profile {
-        print(describe(lookUpProfile(app: rule.target.app, profile: p), profile: p, app: rule.target.app))
+        let lookup = lookUpProfile(app: rule.target.app, profile: p)
+        print(describe(lookup, profile: p, app: rule.target.app))
+        // A terminal may read the names; the app macOS starts may not (ADR 0004).
+        if case .directory(let dir) = lookup, dir != p {
+            print("write the directory in the rule: on macOS 27 a clicked link cannot look up the name")
+        }
     }
     exit(0)
 

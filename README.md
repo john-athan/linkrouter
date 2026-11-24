@@ -51,8 +51,8 @@ stays the default browser.
 ## Rules
 
 ```
-~/work                 Google Chrome: Work
-~/work/clients/acme    Google Chrome: Acme
+~/work                 Google Chrome: Default
+~/work/clients/acme    Google Chrome: Profile 2
 *                      Safari
 ```
 
@@ -60,13 +60,16 @@ A folder, two spaces or a tab, then an app and, after a colon, an optional
 profile. The most specific folder that contains the clicked window's folder
 wins, so the order of the lines does not matter. `*` takes everything else.
 
-The profile can be the name Chrome shows ("Work") or its directory
-("Profile 2"); the name wins if both match. Profiles work for Google Chrome,
-Chrome Beta, Chromium and Brave. A profile Linkrouter cannot find opens
-nothing: it asks first, since Chrome would otherwise create an empty profile
-of that name. The file is read on every link, so an edit counts immediately.
+Write the profile as its directory ("Default", "Profile 2"). The name Chrome
+shows ("Work") works only where macOS lets Linkrouter read Chrome's files; macOS
+27 refuses that without asking. Where it is allowed, the name wins if both match.
+Profiles work for Google Chrome, Chrome Beta, Chromium and Brave. A profile
+Linkrouter cannot find opens nothing: it asks first, since Chrome would
+otherwise create an empty profile of that name. The file is read on every link,
+so an edit counts immediately.
 
-To see which rule a folder gets, without opening anything:
+To see which rule a folder gets, and the directory of a profile you named,
+without opening anything:
 
 ```sh
 linkrouter --which ~/work/clients/acme

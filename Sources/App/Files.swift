@@ -20,8 +20,10 @@ func loadRules() -> [Rule] {
 }
 
 func lookUpProfile(app: String, profile: String) -> ProfileLookup {
-    let state = chromiumSupportDirs[app].flatMap {
-        FileManager.default.contents(atPath: "\(home)/Library/Application Support/\($0)/Local State")
+    guard let support = chromiumSupportDirs[app] else { return .unreadable }
+    let base = "\(home)/Library/Application Support/\(support)/"
+    return lookUpProfile(profile, localState: FileManager.default.contents(atPath: base + "Local State")) { dir in
+        var isDirectory: ObjCBool = false
+        return FileManager.default.fileExists(atPath: base + dir, isDirectory: &isDirectory) && isDirectory.boolValue
     }
-    return lookUpProfile(profile, localState: state)
 }

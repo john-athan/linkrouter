@@ -25,7 +25,8 @@ and it holds the Accessibility permission. Both are worth stating limits for.
   written. The file is readable by you only and stays under 256 KiB
   ([ADR 0005](docs/adr/0005-the-log-names-hosts-not-links.md)).
 - **It reads two files of yours.** The rules file, and a Chromium browser's
-  `Local State` when a rule names a profile by its display name.
+  `Local State` when a rule names a profile. Where macOS refuses the second, it
+  only checks that the profile's directory exists.
 
 ## Scope notes
 
