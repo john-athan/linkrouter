@@ -6,6 +6,8 @@ All notable changes to this project are documented here. Format loosely follows
 
 ## [Unreleased]
 
+- The Accessibility grant survives upgrades: installing signs the app with a certificate made on your Mac, and clears the dead entry of an older build so macOS asks one last time
+- Homebrew: `linkrouter-install` copies and signs the app, instead of `cp -R`, and the `linkrouter` command runs the installed copy
 - macOS 27 does not let the app read Chrome's profile names: a rule with the profile's directory (`Default`, `Profile 2`) now works without them, if that directory exists
 - The alert for a name that cannot be looked up says that macOS refused it and how to find the directory, and `--which` says when a rule should use the directory
 

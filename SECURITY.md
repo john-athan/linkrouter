@@ -38,6 +38,9 @@ your default browser, so it is not a boundary Linkrouter defends.
 window's `AXDocument`, so a hostile app could pick which of your rules applies
 to a link clicked in it. It cannot pick an app that no rule names.
 
-**Ad-hoc signed.** Linkrouter is built on your Mac from source and has no
-Developer ID signature or hardened runtime. macOS keys the Accessibility grant
-to the binary, which is why every upgrade asks for it again.
+**Signed on your Mac.** Linkrouter is built from source and has no Developer ID
+signature or hardened runtime. Installing signs it with a self-signed certificate
+made on your Mac, and macOS keys the Accessibility grant to that. The key cannot
+be exported, but `codesign` may use it without asking, so a process running as
+you could sign its own binary as Linkrouter and inherit the grant. That is the
+price of not granting it again on every upgrade.

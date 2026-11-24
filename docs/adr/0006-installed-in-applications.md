@@ -23,5 +23,12 @@ run again. `make install` does that for a copy in `~/Applications`.
 
 ## Consequences
 
-After a Homebrew upgrade the copy in `/Applications` is replaced by hand, and
-Accessibility is granted again, as for every ad-hoc signed app here.
+After a Homebrew upgrade, `linkrouter-install` replaces the copy in
+`/Applications`.
+
+Amended 2026-11-24. Accessibility used to be granted again after every upgrade,
+since an ad-hoc signature is a hash of the binary. The installed copy is now
+signed with a self-signed certificate made on the Mac (`tools/sign-app.sh`),
+which macOS recognises across builds. Pinning an ad-hoc signature to the bundle
+identifier also works and needs no key, but any program could then claim the
+identifier. A Developer ID would do it for prebuilt copies and costs money.

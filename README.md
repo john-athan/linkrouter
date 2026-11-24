@@ -18,13 +18,14 @@ picks a browser and a profile, and hands the link over.
 
 ```sh
 brew install john-athan/tap/linkrouter
-cp -R "$(brew --prefix linkrouter)/Linkrouter.app" /Applications/
+linkrouter-install
 ```
 
 Homebrew builds it from source with `swiftc` and puts `linkrouter` on your
-PATH. The app has to be copied to `/Applications`, because the default browser
-is tied to where the app is and Homebrew removes its own copy on every upgrade.
-After `brew upgrade linkrouter`, copy it again.
+PATH. `linkrouter-install` copies the app to `/Applications`, because the default
+browser is tied to where the app is and Homebrew removes its own copy on every
+upgrade, and signs it with a certificate it makes on your Mac the first time
+(see [Permissions](#permissions)). Run it again after `brew upgrade linkrouter`.
 
 ### From source
 
@@ -108,12 +109,15 @@ routed by that path too.
 One: Accessibility, to read the focused window's folder. Without it every link
 goes to the `*` rule, so nothing breaks, it just stops routing.
 
-Linkrouter is ad-hoc signed, so macOS keys the grant to a hash of the binary,
-and every rebuild is a new app to it. After every upgrade:
+The grant survives upgrades. `make install` and `linkrouter-install` sign the app
+with a self-signed certificate made on your Mac, and macOS recognises the next
+version by it. Without one, every build is a new app to macOS and the grant is
+dead, although the switch stays on. Coming from 1.0.2 or older, the first install
+clears that dead entry and macOS asks one last time.
 
-1. Open System Settings → Privacy & Security → Accessibility.
-2. Select Linkrouter and remove it with the minus button.
-3. Open a link and allow it again.
+The certificate is trusted for nothing. Its key is in
+`~/Library/Keychains/local-app-signing.keychain-db`, is not exportable, and is
+shared by the other apps of mine you build. Deleting it costs one more grant.
 
 ## Privacy
 
